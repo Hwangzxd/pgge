@@ -14,7 +14,7 @@ public class PlayerState : FSMState
 {
     protected Player mPlayer = null;
 
-    public PlayerState(Player player) 
+    public PlayerState(Player player)
         : base()
     {
         mPlayer = player;
@@ -167,7 +167,7 @@ public class PlayerState_ATTACK : PlayerState
         // Fire buttons.
         // Discuss with your tutor if you find any difficulties
         // in implementing this section.        
-        
+
         // For tutor - start ---------------------------------------------//
         //Debug.Log("Ammo count: " + mPlayer.mAmunitionCount + ", In Magazine: " + mPlayer.mBulletsInMagazine);
         if (mPlayer.mBulletsInMagazine == 0 && mPlayer.mAmunitionCount > 0)
@@ -209,13 +209,31 @@ public class PlayerState_RELOAD : PlayerState
 
     public override void Enter()
     {
+        mPlayer.mAnimator.SetTrigger("Reload");
+        mPlayer.Reload();
+        dt = 0.0f;
     }
     public override void Exit()
     {
+        if (mPlayer.mAmunitionCount > mPlayer.mMaxAmunitionBeforeReload)
+        {
+            mPlayer.mBulletsInMagazine += mPlayer.mMaxAmunitionBeforeReload;
+            mPlayer.mAmunitionCount -= mPlayer.mBulletsInMagazine;
+        }
+        else if (mPlayer.mAmunitionCount > 0 && mPlayer.mAmunitionCount < mPlayer.mMaxAmunitionBeforeReload)
+        {
+            mPlayer.mBulletsInMagazine += mPlayer.mAmunitionCount;
+            mPlayer.mAmunitionCount = 0;
+        }
     }
 
     public override void Update()
     {
+        dt += Time.deltaTime;
+        if (dt >= ReloadTime)
+        {
+            mPlayer.mFsm.SetCurrentState((int)PlayerStateType.MOVEMENT);
+        }
     }
 
     public override void FixedUpdate()
